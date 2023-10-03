@@ -1,0 +1,14 @@
+---
+
+- name: Configure NTP
+  hosts: all
+  become: true
+  become_method: sudo
+  any_errors_fatal: true
+  gather_facts: true
+  vars_files:
+    - vars/main.yml
+    - vars/system.yml
+
+  roles:
+    - role: ntp

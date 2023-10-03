@@ -1,0 +1,7 @@
+---
+#Disks variables for DB
+device: "/dev/sdb"
+part: "1"
+mount: "/mnt/db"
+dbuser: "admin"
+dbpassword: "password"
