@@ -59,13 +59,13 @@ spec:
             httpGet:
               path: {{ .Values.uservars.probe.path }}
               port: http
-#          readinessProbe:
-#            initialDelaySeconds: {{ .Values.uservars.probe.delay }}
-#            periodSeconds: {{ .Values.uservars.probe.period }}
-#            timeoutSeconds: {{ .Values.uservars.probe.timeout }}
-#            httpGet:
-#              path: {{ .Values.uservars.probe.path }}
-#              port: http
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.uservars.probe.delay }}
+            periodSeconds: {{ .Values.uservars.probe.period }}
+            timeoutSeconds: {{ .Values.uservars.probe.timeout }}
+            httpGet:
+              path: {{ .Values.uservars.probe.path }}
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
