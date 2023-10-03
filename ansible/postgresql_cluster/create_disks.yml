@@ -12,12 +12,12 @@
   tasks:
 
   - name: Install parted
-    package:
+    ansible.builtin.package:
       name: parted
       state: present
 
   - name: Сreate DB directory
-    file:
+    ansible.builtin.file:
       path: "{{ mount }}"
       state: directory
       mode: '0755'
@@ -38,11 +38,11 @@
       opts: -cc
 
   - name: get UUID
-    command: lsblk "{{ device + part }}" -no UUID
+    ansible.builtin.command: lsblk "{{ device + part }}" -no UUID
     register: uuid
 
   - name: mount new volumes
-    mount:
+    ansible.posix.mount:
       path: "{{ mount }}"
       src: UUID={{ uuid.stdout_lines[0] }}
       state: mounted

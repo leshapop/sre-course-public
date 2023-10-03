@@ -10,10 +10,20 @@
   tasks:
 
   - name: Create weather db
-    postgresql_db: name=weather encoding='UTF-8' lc_collate='ru_RU.UTF-8' lc_ctype='ru_RU.UTF-8' state=present
+    community.postgresql.postgresql_db:
+      name: weather
+      encoding: 'UTF-8'
+      lc_collate: 'ru_RU.UTF-8'
+      lc_ctype: 'ru_RU.UTF-8'
+      state: present
 
   - name: Create weather role for db
-    postgresql_user: db=weather user="{{ dbuser }}" password="{{ dbpassword }}" priv=ALL state=present
+    postgresql_user: 
+      db: weather
+      user: "{{ dbuser }}"
+      password: "{{ dbpassword }}"
+      priv: ALL
+      state: present
 
   - name: Copy file
     ansible.builtin.copy:
@@ -22,13 +32,36 @@
       mode: '0666'
 
   - name: Importing weather db
-    shell: psql weather < /var/lib/postgresql/init.sql
+    ansible.builtin.shell:
+      psql weather < /var/lib/postgresql/init.sql
 
   - name: Grant usage of schema to weather role
-    postgresql_privs: database=weather state=present privs=USAGE type=schema roles="{{ dbuser }}" objs=public
+    community.postgresql.postgresql_privs:
+      database: weather
+      state: present
+      privs: USAGE
+      type: schema
+      roles: "{{ dbuser }}"
+      objs: public
 
   - name: Grant table permissions for "{{ dbuser }}" role
-    postgresql_privs: database=weather schema=public state=present privs=SELECT,INSERT,UPDATE type=table roles="{{ dbuser }}" grant_option=no objs=ALL_IN_SCHEMA
+    community.postgresql.postgresql_privs: 
+      database: weather
+      schema: public
+      state: present
+      privs: SELECT,INSERT,UPDATE
+      type: table
+      roles: "{{ dbuser }}"
+      grant_option: no
+      objs: ALL_IN_SCHEMA
 
   - name: Grant permissions for "{{ dbuser }}" role
-    postgresql_privs: database=weather schema=public state=present privs=USAGE type=sequence roles="{{ dbuser }}" grant_option=no objs=ALL_IN_SCHEMA
+    community.postgresql.postgresql_privs: 
+      database: weather
+      schema: public
+      state: present
+      privs: USAGE
+      type: sequence
+      roles: "{{ dbuser }}"
+      grant_option: no
+      objs: ALL_IN_SCHEMA
