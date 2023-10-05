@@ -7,8 +7,8 @@ Student71
 - cd ./ansible/postgresql_cluster dir
 - Edit inventory file and variables in /vars/main.yml
   - OPTIONAL: If you want store DB in another disk - create VM(pgsql nodes) with 2 disks and edit /vars/disks.yml (second disk is set /dev/sdb by default) 
-  - OR LEAVE this by default (postgresql_data_dir:/var/lib/postgresql) in config files and go to #4
-  - OPTIONAL: EDIT postgresql_data_dir: variable (default /mnt/db)
+  - OR LEAVE this by default (postgresql_data_dir:/var/lib/postgresql) in config files (Debian.yml) and go to #4
+  - OPTIONAL: EDIT postgresql_data_dir: variable (for example /mnt/db) in /vars/Debian.yml
   - OPTIONAL: RUN ansible-playbook create_disks.yml and CHECK for all done and mounted well!
 - RUN ansible all -m ping
 - RUN ansible-playbook deploy_pgcluster.yml
