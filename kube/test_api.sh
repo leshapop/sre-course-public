@@ -1,3 +1,3 @@
 #!/bin/sh
 
-curl -X "GET" "http://xxx.xxx.xxx.xxx/WeatherForecast" -H "Host:weather.student71.local"
+curl -X "GET" "http://0.0.0.0/WeatherForecast" -H "Host:weather.student71.local" -v

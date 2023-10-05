@@ -18,7 +18,7 @@
       state: present
 
   - name: Create weather role for db
-    postgresql_user: 
+    community.postgresql.postgresql_user:
       db: weather
       user: "{{ dbuser }}"
       password: "{{ dbpassword }}"
