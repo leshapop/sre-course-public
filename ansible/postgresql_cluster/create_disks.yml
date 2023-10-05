@@ -16,12 +16,6 @@
       name: parted
       state: present
 
-  - name: Сreate DB directory
-    ansible.builtin.file:
-      path: "{{ mount }}"
-      state: directory
-      mode: '0755'
-
   - name: Create a new ext4 primary partition
     parted:
       device: "{{ device }}"
@@ -29,16 +23,24 @@
       state: present
       fs_type: ext4
       label: gpt
+      part_start: "1MiB"
       part_end: "100%"
 
   - name: Create a ext4 filesystem on "{{ device + part }}"
-    filesystem:
+    community.general.filesystem:
       fstype: ext4
       dev: "{{ device + part }}"
-      opts: -cc
+      state: present
+
+  - name: Сreate DB directory
+    ansible.builtin.file:
+      path: "{{ mount }}"
+      state: directory
+      mode: '0755'
 
   - name: get UUID
-    ansible.builtin.command: lsblk "{{ device + part }}" -no UUID
+    ansible.builtin.command:
+      lsblk "{{ device + part }}" -no UUID
     register: uuid
 
   - name: mount new volumes

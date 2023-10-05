@@ -56,16 +56,20 @@ spec:
             initialDelaySeconds: {{ .Values.uservars.probe.delay }}
             periodSeconds: {{ .Values.uservars.probe.period }}
             timeoutSeconds: {{ .Values.uservars.probe.timeout }}
-            httpGet:
-              path: {{ .Values.uservars.probe.path }}
+            tcpSocket:
               port: http
+#            httpGet:
+#              path: {{ .Values.uservars.probe.livepath }}
+#              port: http
           readinessProbe:
             initialDelaySeconds: {{ .Values.uservars.probe.delay }}
             periodSeconds: {{ .Values.uservars.probe.period }}
             timeoutSeconds: {{ .Values.uservars.probe.timeout }}
-            httpGet:
-              path: {{ .Values.uservars.probe.path }}
+            tcpSocket:
               port: http
+#            httpGet:
+#              path: {{ .Values.uservars.probe.readpath }}
+#              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}

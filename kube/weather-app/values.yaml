@@ -107,4 +107,7 @@ uservars:
       delay: "30"
       period: "20"
       timeout: "10"
-      path: "/WeatherForecast"
+      livepath: "/healthz/live"
+      readpath: " /healthz/ready"
+#      livepath: "/WeatherForecast"
+#      readpath: "/WeatherForecast"
