@@ -3,6 +3,7 @@
 device: "/dev/sdb"
 part: "1"
 mount: "/mnt/db"
+
 #DB create variables
 dbuser: "admin"
 dbpassword: "password"
