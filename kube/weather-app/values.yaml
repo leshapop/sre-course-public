@@ -5,7 +5,7 @@
 replicaCount: 3
 
 image:
-  repository: ghcr.io/ldest/sre-course/api
+  repository: ghcr.io/ldest/sre-course/api:f0135e1
   pullPolicy: IfNotPresent
   tag: "f0135e1"
 
