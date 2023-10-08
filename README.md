@@ -1,8 +1,9 @@
 # MTS sre-course homework leshapop@gmail.com
 Student71
 
-- You need create 6 VMs (etcd1,2,3;pgsql1,2;haproxy1). This configuration tested at Debian 11, 12, Ubuntu 22.04.
-   - Install Ansible on one control node. RUN:
+- You need create `6` VMs (`etcd1,2,3` `pgsql1,2` `haproxy1`). This configuration tested at `Debian 11, 12, Ubuntu 22.04`.
+   - Install Ansible on one control node.
+   - RUN:
   ```
    - sudo apt update && sudo apt install -y python3-pip sshpass git
   ```
