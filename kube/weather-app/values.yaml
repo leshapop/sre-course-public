@@ -67,7 +67,7 @@ envmap:
     value: 'Production'
 #    value: 'Development'
   - name: "CONNECTIONSTRINGS__PGCONNECTION"
-    value: "server='91.185.85.249'; port='5000'; database='weather'; user id='admin'; password='Aen7724Fdn229!st';"
+    value: "server='0.0.0.0'; port='5000'; database='weather'; user id='admin'; password='password';"
 uservars:
     probe:
       liveDelay: 10
