@@ -1,4 +1,4 @@
-MTS sre-course homework leshapop@gmail.com
+# MTS sre-course homework leshapop@gmail.com
 Student71
 
 - You need create 6 VMs (etcd1,2,3;pgsql1,2;haproxy1). This configuration tested at Debian 11, 12, Ubuntu 22.04.
@@ -13,13 +13,10 @@ Student71
 - cd `./ansible/postgresql_cluster`
 - Edit inventory file and variables in `/vars/main.yml`
 - DON'T FORGET add in pg_hba your haproxy IP!!!
-  - OPTIONAL: If you want store DB in another disk - create VM(pgsql nodes) with 2 disks and edit `/vars/user_vars.yml` (second disk is set /dev/sdb by default) 
+  - `OPTIONAL` If you want store DB in another disk - create VM(pgsql nodes) with 2 disks and edit `/vars/user_vars.yml` (second disk is set /dev/sdb by default) 
   - OR LEAVE this by default (`postgresql_data_dir:/var/lib/postgresql`) in config files (in `/vars/ Debian.yml or RedHat.yml`)
-  - OPTIONAL: EDIT postgresql_data_dir: variable (default /mnt/db) (in `/vars/ Debian.yml or RedHat.yml`)
-  - OPTIONAL: RUN:
-  ```
-  - ansible-playbook create_disks.yml and CHECK for all done and mounted well!
-  ```
+  - `OPTIONAL` EDIT postgresql_data_dir: variable (default /mnt/db) (in `/vars/ Debian.yml or RedHat.yml`)
+  - `OPTIONAL` RUN: `- ansible-playbook create_disks.yml and CHECK for all done and mounted well!`
 - RUN:
 ```
 - ansible all -m ping
