@@ -5,21 +5,18 @@
 replicaCount: 3
 
 image:
-  repository: ghcr.io/ldest/sre-course/api:c4f3862
+  repository: ghcr.io/ldest/sre-course/api
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "c4f3862"
 
 imagePullSecrets: []
 nameOverride: ""
-fullnameOverride: "s71-weather-app"
+fullnameOverride: ""
 
-serviceAccount:
-  create: false
-  automount: true
-  annotations: {}
-  name: "student71"
+serviceAccount: {}
 
 podAnnotations: {}
+
 podLabels: {}
 
 podSecurityContext: {}
@@ -49,14 +46,10 @@ resources:
     cpu: "100m"
     memory: "256Mi"
   requests:
-    cpu: "50m"
+    cpu: "30m"
     memory: "64Mi"
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 3
-  targetCPUUtilizationPercentage: 80
+autoscaling: {}
 
 volumes: []
 
@@ -77,8 +70,9 @@ envmap:
     value: "server='0.0.0.0'; port='5000'; database='weather'; user id='admin'; password='password';"
 uservars:
     probe:
-      delay: "10"
-      period: "10"
-      timeout: "10"
+      liveDelay: 10
+      livePeriod: 30
+      readDelay: 6
+      readPeriod: 10
       livepath: "/healthz/live"
-      readpath: " /healthz/ready"
+      readpath: "/healthz/ready"

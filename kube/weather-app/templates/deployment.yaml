@@ -4,6 +4,8 @@ metadata:
   name: {{ include "weather-app.fullname" . }}
   labels:
     {{- include "weather-app.labels" . | nindent 4 }}
+  annotations:
+    rollme: {{ randAlphaNum 5 | quote  }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -47,23 +49,17 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
-            initialDelaySeconds: {{ .Values.uservars.probe.delay }}
-            periodSeconds: {{ .Values.uservars.probe.period }}
-            timeoutSeconds: {{ .Values.uservars.probe.timeout }}
-            tcpSocket:
+            initialDelaySeconds: {{ .Values.uservars.probe.liveDelay }}
+            periodSeconds: {{ .Values.uservars.probe.livePeriod }}
+            httpGet:
+              path: {{ .Values.uservars.probe.livepath }}
               port: http
-#            httpGet:
-#              path: {{ .Values.uservars.probe.livepath }}
-#              port: http
           readinessProbe:
-            initialDelaySeconds: {{ .Values.uservars.probe.delay }}
-            periodSeconds: {{ .Values.uservars.probe.period }}
-            timeoutSeconds: {{ .Values.uservars.probe.timeout }}
-            tcpSocket:
+            initialDelaySeconds: {{ .Values.uservars.probe.readDelay }}
+            periodSeconds: {{ .Values.uservars.probe.readPeriod }}
+            httpGet:
+              path: {{ .Values.uservars.probe.readpath }}
               port: http
-#            httpGet:
-#              path: {{ .Values.uservars.probe.readpath }}
-#              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}
