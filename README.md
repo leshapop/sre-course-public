@@ -13,7 +13,7 @@ Student71
   - OPTIONAL: RUN ansible-playbook create_disks.yml and CHECK for all done and mounted well!
 - RUN ansible all -m ping
 - RUN ansible-playbook deploy_pgcluster.yml
-- Next we need init db 'weather', RUN ansible-playbook init_db_weather_app.yml
+- Next we need init db 'weather', edit login and password in /vars/user_vars.yml, RUN ansible-playbook init_db_weather_app.yml
 - Install kubectl and HELM
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
   - chmod 700 get_helm.sh
