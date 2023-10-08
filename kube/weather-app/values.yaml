@@ -44,10 +44,10 @@ ingress:
 resources:
   limits:
     cpu: "100m"
-    memory: "256Mi"
+    memory: "512Mi"
   requests:
-    cpu: "30m"
-    memory: "64Mi"
+    cpu: "50m"
+    memory: "128Mi"
 
 autoscaling: {}
 
@@ -67,12 +67,14 @@ envmap:
     value: 'Production'
 #    value: 'Development'
   - name: "CONNECTIONSTRINGS__PGCONNECTION"
-    value: "server='0.0.0.0'; port='5000'; database='weather'; user id='admin'; password='password';"
+    value: "server='91.185.85.249'; port='5000'; database='weather'; user id='admin'; password='Aen7724Fdn229!st';"
 uservars:
     probe:
       liveDelay: 10
       livePeriod: 30
-      readDelay: 6
-      readPeriod: 10
+      liveTimeout: 5
+      readDelay: 5
+      readPeriod: 5
+      readTimeout: 1
       livepath: "/healthz/live"
       readpath: "/healthz/ready"

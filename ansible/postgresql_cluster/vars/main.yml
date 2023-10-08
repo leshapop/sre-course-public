@@ -9,10 +9,6 @@ proxy_env: {}  # yamllint disable rule:braces
 # Cluster variables
 cluster_vip: ""  # IP address for client access to the databases in the cluster (optional).
 vip_interface: "{{ ansible_default_ipv4.interface }}"  # interface name (e.g., "ens32").
-# Note: VIP-based solutions such as keepalived or vip-manager may not function correctly in cloud environments like AWS.
-# Recommendations for cloud environments:
-# - For the "Type A" scheme: Use DNS records listing all HAProxy load balancing servers instead of relying on cluster_vip.
-# - For the "Type B" scheme: Use libpq `target_session_attrs`, ensuring read/write connections go to the primary database, as an alternative to cluster_vip.
 
 patroni_cluster_name: "s71_pgsql_cluster"  # the cluster name (must be unique for each cluster)
 patroni_install_version: "3.1.0"  # or 'latest'
@@ -277,6 +273,7 @@ postgresql_pg_hba:
   - { type: "local", database: "replication", user: "{{ patroni_superuser_username }}", address: "", method: "trust" }
   - { type: "local", database: "all", user: "all", address: "", method: "peer" }
   - { type: "host", database: "all", user: "{{ pgbouncer_auth_username }}", address: "127.0.0.1/32", method: "trust" } # required for pgbouncer auth_user
+  - { type: "host", database: "all", user: "all", address: "10.0.33.0/24", method: "trust" } # for haproxy ip
   - { type: "host", database: "all", user: "all", address: "127.0.0.1/32", method: "{{ postgresql_password_encryption_algorithm }}" }
   - { type: "host", database: "all", user: "all", address: "::1/128", method: "{{ postgresql_password_encryption_algorithm }}" }
 #  - { type: "host", database: "mydatabase", user: "mydb-user", address: "192.168.0.0/24", method: "{{ postgresql_password_encryption_algorithm }}" }

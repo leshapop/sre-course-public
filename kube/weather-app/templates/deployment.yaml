@@ -51,12 +51,14 @@ spec:
           livenessProbe:
             initialDelaySeconds: {{ .Values.uservars.probe.liveDelay }}
             periodSeconds: {{ .Values.uservars.probe.livePeriod }}
+            timeoutSeconds: {{ .Values.uservars.probe.liveTimeout }}
             httpGet:
               path: {{ .Values.uservars.probe.livepath }}
               port: http
           readinessProbe:
             initialDelaySeconds: {{ .Values.uservars.probe.readDelay }}
             periodSeconds: {{ .Values.uservars.probe.readPeriod }}
+            timeoutSeconds: {{ .Values.uservars.probe.readTimeout }}
             httpGet:
               path: {{ .Values.uservars.probe.readpath }}
               port: http
