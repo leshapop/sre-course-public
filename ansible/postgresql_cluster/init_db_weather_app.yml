@@ -1,5 +1,5 @@
 ---
-- name: Create "{{ dbname }}" DB
+- name: Create DB
   hosts: master  #master... Master of puppets i`m pulling your strings...
   become: true
   become_user: postgres
