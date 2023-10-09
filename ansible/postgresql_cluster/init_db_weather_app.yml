@@ -1,5 +1,5 @@
 ---
-- name: Create weather DB
+- name: Create "{{ dbname }}" DB
   hosts: master  #master... Master of puppets i`m pulling your strings...
   become: true
   become_user: postgres
@@ -9,17 +9,17 @@
 
   tasks:
 
-  - name: Create weather db
+  - name: Create "{{ dbname }}" db
     community.postgresql.postgresql_db:
-      name: weather
+      name: "{{ dbname }}"
       encoding: 'UTF-8'
       lc_collate: 'ru_RU.UTF-8'
       lc_ctype: 'ru_RU.UTF-8'
       state: present
 
-  - name: Create weather role for db
+  - name: Create "{{ dbname }}" role for db
     community.postgresql.postgresql_user:
-      db: weather
+      db: "{{ dbname }}"
       user: "{{ dbuser }}"
       password: "{{ dbpassword }}"
       priv: ALL
@@ -31,13 +31,13 @@
       dest: /var/lib/postgresql/init.sql #default DB path
       mode: '0666'
 
-  - name: Importing weather db
+  - name: Importing "{{ dbname }}" db
     ansible.builtin.shell:
-      psql weather < /var/lib/postgresql/init.sql
+      psql "{{ dbname }}" < /var/lib/postgresql/init.sql
 
-  - name: Grant usage of schema to weather role
+  - name: Grant usage of schema to "{{ dbname }}" role
     community.postgresql.postgresql_privs:
-      database: weather
+      database: "{{ dbname }}"
       state: present
       privs: USAGE
       type: schema
@@ -46,7 +46,7 @@
 
   - name: Grant table permissions for "{{ dbuser }}" role
     community.postgresql.postgresql_privs: 
-      database: weather
+      database: "{{ dbname }}"
       schema: public
       state: present
       privs: SELECT,INSERT,UPDATE
@@ -57,7 +57,7 @@
 
   - name: Grant permissions for "{{ dbuser }}" role
     community.postgresql.postgresql_privs: 
-      database: weather
+      database: "{{ dbname }}"
       schema: public
       state: present
       privs: USAGE
