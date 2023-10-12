@@ -5,11 +5,11 @@ Student71
    - Install Ansible on one control node.
    - RUN:
   ```
-   - sudo apt update && sudo apt install -y python3-pip sshpass git
+  sudo apt update && sudo apt install -y python3-pip sshpass git
   ```
    - RUN:
   ```
-   -  sudo pip3 install ansible
+  sudo pip3 install ansible
   ```
 - cd `./ansible/postgresql_cluster`
 - Edit inventory file and variables in `/vars/main.yml`
@@ -20,36 +20,36 @@ Student71
   - `OPTIONAL` RUN: `- ansible-playbook create_disks.yml and CHECK for all done and mounted well!`
 - RUN:
 ```
-- ansible all -m ping
+ansible all -m ping
 ```
 - RUN:
 ```
-- ansible-playbook deploy_pgcluster.yml
+ansible-playbook deploy_pgcluster.yml
 ```
 - Next we need init db 'weather', edit login and password in `/vars/user_vars.yml`
 - RUN:
 ```
--  ansible-playbook init_db_weather_app.yml
+ansible-playbook init_db_weather_app.yml
 ```
 - Install `HELM`
 ```
-  - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 ```
 ```
-  - chmod 700 get_helm.sh
+chmod 700 get_helm.sh
 ```
 ```
-  - ./get_helm.sh
+./get_helm.sh
 ```
 - Install `Kubectl`
 ```
-  - curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
+curl -LO https://dl.k8s.io/release/`curl -LS https://dl.k8s.io/release/stable.txt`/bin/linux/amd64/kubectl
 ```
 ```
-  - chmod +x ./kubectl
+chmod +x ./kubectl
 ```
 ```
-  - sudo mv ./kubectl /usr/local/bin/kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
 ```
 - cd `./kube/` and edit `/weather-app/values.yaml`
 - Use your kubeconfig. (`--kubeconfig`)
