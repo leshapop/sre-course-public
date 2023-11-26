@@ -42,14 +42,14 @@ Forecast/${Cities_id}
 2. Требования SLA/SLO
 
 SLA: 
-1. Request duration P95 <= 500ms
+1. Request duration P95 <= 600ms
 2. Error rate < 2%
-3. Max Load time 5m
+3. Max Load time 8m
 
 SLO:
-1. Request duration P95 <= 400ms
+1. Request duration P95 <= 500ms
 2. Error rate <= 1%
-3. Max Load time 6m
+3. Max Load time 10m
 
 3. Инструменты:
 K6 Grafana
@@ -59,19 +59,22 @@ K6 Grafana
 1. Breakpoint test (web-api-test-breakpoint.js) 1:1 (GET/POST)
 Описание: Постепенное увеличение нагрузки до критической.
 Цели: Поиск максимума нагрузки RPS, поиск узкого места, происк точки отказа.
-Методы: GET/POST Endpoints (WeatherForecast/Cities) 1:1 (GET/POST)
+Методы: GET (ALL)
+Методы: POST Cities
 
-2. Stress test (web-api-test-stress.js) 1:1 (GET/POST)
+3. Stress test (web-api-test-stress.js) 1:1 (GET/POST)
 Описание: Постепенное увеличение нагрузки до 90% от максимума. Поддержание нагрузки 1 x Max Load time.
 Цели: Проверка выполнения SLO за расчетное время под нагрузкой 90% от максимума 1 x Max Load time.
-Методы: GET/POST Endpoints (ALL) 1:1 (GET/POST)
+Методы: GET (ALL) 80%
+Методы: POST Cities 10%
 
-3. Daily Test (web-api-test-daily.js) 1:1 (GET/POST)
+5. Daily Test (web-api-test-daily.js) 1:1 (GET/POST)
 Описание: Поддержание нагрузки 50% от максимума 2 x Max Load time.
 Цели: Проверка выполнения SLO под стандартной дневной нагрузкой определенной в 50% от максимума за 2 x Max Load time.
-Методы: GET/POST Endpoints - (ALL) 1:1 (GET/POST)
+Методы: GET (ALL) 45%
+Методы: POST Cities 5%
 
-5. Отчет о тестировании:
+6. Отчет о тестировании:
 
 Breakpoint test: 
 При НТ 1:1 (GET/POST) >800 req/s возникает деградация сервиса, загрузка DB 100% по CPU, загрузка ПОДов 100%, Request duration P95 > 7s. Достигнуто узкое место в системе.
