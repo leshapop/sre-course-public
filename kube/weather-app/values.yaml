@@ -5,9 +5,9 @@
 replicaCount: 3
 
 image:
-  repository: ghcr.io/ldest/sre-course/api:f0135e1
+  repository: ghcr.io/ldest/sre-course/api:7c04bc9
   pullPolicy: IfNotPresent
-  tag: "f0135e1"
+  tag: "7c04bc9"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -43,10 +43,10 @@ ingress:
 
 resources:
   limits:
-    cpu: "200m"
+    cpu: "250m"
     memory: "256Mi"
   requests:
-    cpu: "50m"
+    cpu: "150m"
     memory: "128Mi"
 
 autoscaling: {}
@@ -70,11 +70,11 @@ envmap:
     value: "server='0.0.0.0'; port='5000'; database='weather'; user id='admin'; password='password';"
 uservars:
     probe:
-      liveDelay: 10
-      livePeriod: 30
+      liveDelay: 15
+      livePeriod: 10
       liveTimeout: 5
-      readDelay: 5
-      readPeriod: 5
-      readTimeout: 1
+      readDelay: 10
+      readPeriod: 10
+      readTimeout: 5
       livepath: "/healthz/live"
       readpath: "/healthz/ready"
