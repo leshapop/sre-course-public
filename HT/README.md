@@ -1,7 +1,8 @@
 # MTS sre-course homework leshapop@gmail.com (Student71)
-WEB-API Forecast hiload testing
 
-![homework postgresql cluster](./images/pg_cluster.png)
+Нагрузочное тестирование WEB API - weather.student71.local
+
+![homework postgresql cluster](../images/pg_cluster.png)
 
 Install testing tool
 
@@ -14,8 +15,7 @@ Install testing tool
 
   ```
 
-Нагрузочное тестирование WEB API - weather.student71.local
-
+Отчет о НТ
 1. Вводные данные
 Headers:
 -H 'Host: weather.student71.local'
