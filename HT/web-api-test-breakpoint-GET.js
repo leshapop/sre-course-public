@@ -10,19 +10,18 @@ const API_GET_ENDPOINT2 = 'Cities/1'
 const API_HOST = 'weather.student71.local'
 const API_POST_ENDPOINT = 'Cities'
 const API_POST_ID = 3
-const VUS_GET = 700
-const TARGET_GET = 683
-const VUS_POST = 50
-const TARGET_POST = 46
+const VUS_GET = 2000 //Find breakpoint
+const TARGET_GET = 2000 //Find breakpoint
+const VUS_POST = 0 //Find breakpoint
+const TARGET_POST = 0 //Find breakpoint
 const DURATION = '10m' // SLO Load time
-const DURATION_POST = '10m' // SLO Load time
 const SLO_ERRORS = 'rate<=0.01'
 const SLO_REQ_DURATION = 'p(95)<=500'
 const SLO_ERRORS_ABORT = true
-const SLO_REQ_DURATION_ABORT = true
+const SLO_REQ_DURATION_ABORT = false
 
 //Fake data for POST REQ
-let Cities = Array('Казань', 'Тверь', 'Белгород', 'Рязань', 'Таганрог', 'Новочеркасск');
+let Cities = Array('Kazan', 'Tver', 'Belgorod', 'Ryazan', 'Taganrog', 'Novocherkassk');
 
 //options
 export const options = {
@@ -37,8 +36,6 @@ export const options = {
       timeUnit: '1s',
       preAllocatedVUs: `${VUS_GET}`,
       stages: [
-
-        { target: `${TARGET_GET}`, duration: `2m` },
         { target: `${TARGET_GET}`, duration: `${DURATION}` },
       ],
     },
@@ -52,8 +49,7 @@ export const options = {
       timeUnit: '1s',
       preAllocatedVUs: `${VUS_POST}`,
       stages: [
-        { target: `${TARGET_POST}`, duration: `2m` },
-        { target: `${TARGET_POST}`, duration: `${DURATION_POST}` },
+        { target: `${TARGET_POST}`, duration: `${DURATION}` },
       ],
     },
   },
