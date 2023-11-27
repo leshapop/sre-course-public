@@ -88,9 +88,7 @@ Endpoints - GET:
 
   ![ht](./images/Breakpoint_POST.png)
 
-  ![ht](./images/Breakpoint_POST_PODCPU.png)
-
-  ![ht](./images/Breakpoint_POST_DBCPU.png)
+  ![ht](./images/Breakpoint_POST_PODCPU.png) ![ht](./images/Breakpoint_POST_DBCPU.png)
 
 # Вывод по breakpoint тестам
   После изучения кода приложения и сравнения RPS при тестировании GET эндпоинтов WeatherForecast/ и Cities/, была найдена проблема в не оптимизированном коде метода WeatherForecast.
