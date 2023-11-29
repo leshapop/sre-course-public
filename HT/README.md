@@ -23,41 +23,43 @@ Headers:
 
 Endpoints - GET:
 `WeatherForecast/`
-`Cities/1`
-`Forecast/1`
+`Cities/`
+`Forecast/`
 
 # Требования SLA/SLO
 `SLA:`
-- Request duration P95 <= 600ms
-- Error rate < 2%
-- Max Load time 8m
+- Request duration **P95 <= 600ms****
+- Error **rate < 2%**
+- Max Load **time 8m**
 
 `SLO:`
-- Request duration P95 <= 500ms
-- Error rate <= 1%
-- Max Load time 10m
+- Request duration **P95 <= 500ms**
+- Error **rate <= 1%**
+- Max Load time **10m**
 
 # API Сервис погоды
-Примем за основу, что для пользователей использующих наш сервис будет достаточно только получать данные о погоде, доступ к INSERT/UPDATE методам будет открыт только операторам и автоматическим сервисам предоставления данных о погоде. Из этого следует, что для дальнейших тестов нам потребуется найти максимальную нагрузку в 100% GET запросов при условии константы POST в <=50RPS. Это не касается Breakpoint профиля.
+Примем за основу, что для пользователей использующих наш сервис будет достаточно только получать данные о погоде, доступ к INSERT/UPDATE методам будет открыт только операторам и автоматическим сервисам предоставления данных о погоде. 
+Из этого следует, что для дальнейших тестов нам потребуется найти максимальную нагрузку в 100% GET запросов при условии POST в <=50RPS. 
+Это не касается Breakpoint профиля.
 
 # Инструменты:
 `K6 Grafana`
 
 # Профили нагрузки:
 
-- Breakpoint test (web-api-test-breakpoint.js) 1:1 (GET/POST)
+- #### Breakpoint test (web-api-test-breakpoint.js) 1:1 (GET/POST)
   * Описание: Постепенное увеличение нагрузки до критической.
   * Цели: Поиск максимума нагрузки RPS, поиск узкого места, происк точки отказа.
   * Методы: GET (WeatherForecast) от 0 до 100%
   * Методы: POST Cities 50 RPS
 
-- Stress test (web-api-test-stress.js) 9:1 (GET/POST)
+- #### Stress test (web-api-test-stress.js) 9:1 (GET/POST)
   * Описание: Постепенное увеличение нагрузки до 90% от максимума. Поддержание нагрузки 1 x Max Load time.
   * Цели: Проверка выполнения SLO за расчетное время под нагрузкой 90% от максимума 1 x Max Load time.
   * Методы: GET (WeatherForecast) 90% от MAXRPS
   * Методы: POST Cities 50 RPS
 
-- Daily Test (web-api-test-daily.js) 9:1 (GET/POST)
+- #### Daily Test (web-api-test-daily.js) 9:1 (GET/POST)
   * Описание: Поддержание нагрузки 50% от максимума 2 x Max Load time. 80% кратковременные пиковые нагрузки в течении 1m
   * Цели: Проверка выполнения SLO под стандартной дневной нагрузкой определенной в 50% от максимума за 2 x Max Load time.
   * Методы: GET (WeatherForecast) 50% от MAXRPS
@@ -66,25 +68,25 @@ Endpoints - GET:
 # Отчет о тестировании:
 
 # Breakpoint test:
-* Метод GET
+* #### Метод GET
   - При НТ GET запросами >=850 req/s возникает деградация сервиса, загрузка ПОДов 100%, Request duration P95 > 3s. 
   - Достигнуто узкое место в системе(PODS CPU).
   - `http_req_duration: max=6.48s p(90)=3.83s  p(95)=4.24s`
   - После падения нагрузки, сервис приходит в норму.
 
-* Графики GET
+* #### Графики GET
   
   ![ht](./images/Breakpoint_GET.png)
 
   ![ht](./images/Breakpoint_GET_pods.png)
 
-* Метод POST
+* #### Метод POST
   - При НТ POST запросами >=480 req/s возникает деградация сервиса, загрузка DB 100% CPU, загрузка ПОДов ~65%, Request duration P95 > 6s. 
   - Достигнуто узкое место в системе (DB CPU).
   - `http_req_duration: max=18.47s p(90)=5.48s p(95)=6.96s`
   - После падения нагрузки, сервис приходит в норму.
 
-* Графики POST
+* #### Графики POST
 
   ![ht](./images/Breakpoint_POST.png)
 
@@ -109,7 +111,7 @@ Endpoints - GET:
   - `http_req_duration: max=3.71s p(90)=44.87ms p(95)=61.21ms`
   - Время ответа не выходит за рамки SLO. Ошибок нет.
 
-  * Графики STRESS test
+  * #### Графики STRESS test
 
   ![ht](./images/Stress_GET.png)
 
@@ -124,7 +126,7 @@ Endpoints - GET:
  - `http_req_duration: max=3.49s   p(90)=34.73ms  p(95)=56.02ms`
  - Время ответа не выходит за рамки SLO. Ошибок нет.
 
- * Графики Daily test
+ * #### Графики Daily test
 
 ![ht](./images/Daily_test2.png)
 
