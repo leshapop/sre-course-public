@@ -28,7 +28,7 @@ Endpoints - GET:
 
 # Требования SLA/SLO
 `SLA:`
-- Request duration **P95 <= 600ms****
+- Request duration **P95 <= 600ms**
 - Error **rate < 2%**
 - Max Load **time 8m**
 
