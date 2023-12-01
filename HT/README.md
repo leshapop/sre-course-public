@@ -59,7 +59,12 @@ Endpoints - GET:
   * Методы: GET (WeatherForecast) 90% от MAXRPS
   * Методы: POST Cities 50 RPS
 
-- #### Daily Test (web-api-test-daily.js) 9:1 (GET/POST)
+- #### API Endpoints test (web-api-test-stress-all.js)
+  * Описание: Постепенное увеличение небольшой нагрузки на все эндпоинты API. Поддержание нагрузки 1 x Max Load time.
+  * Цели: Проверка работы всех эндпоинтов API на ошибки при соблюдении SLA/SLO. 
+  * Методы: GET/POST (ALL)
+
+- #### Daily Test (web-api-test-daily.js) 5:0.5 (GET/POST)
   * Описание: Поддержание нагрузки 50% от максимума 2 x Max Load time. 80% кратковременные пиковые нагрузки в течении 1m
   * Цели: Проверка выполнения SLO под стандартной дневной нагрузкой определенной в 50% от максимума за 2 x Max Load time.
   * Методы: GET (WeatherForecast) 50% от MAXRPS
@@ -102,6 +107,26 @@ Endpoints - GET:
   - Максимальную производительность системы при POST запросах на запись в 480 RPS - 5% погрешность = 460 RPS, при условии соблюдении требования SLO.
   - Расчитаем 90% RPS нагрузки: 810 RPS * 0.9 = 729 RPS
   - Раcчитаем общий профиль нагрузки в 90% GET/POST: 729RPS_GET - (460RPS_POST * 0.1 = 46) =~ 683RPS_GET + 46RPS_POST
+
+# API Endpoints test
+  - Создаем или выделяем несколько записей из базы (andomItem) для теста.
+  - Запрашиваем каждую точку API по GET.
+  - Меняем данные PUT.
+  - Повторно запрашиваем измененные данные GET.
+  - Меняем данные обратно на исходные PUT.
+  - Все время запрашиваем рабочую точку WeatherForecast.
+  ````
+     ✓ WeatherForecast_res status is 200
+     ✓ C_res status is 200
+     ✓ C_res_get_cityid status is 200
+     ✓ C_put status is 200
+     ✓ C_put_back status is 200
+     ✓ FC_res status is 200
+     ✓ FC_res_get_forecastid status is 200
+     ✓ FC_PUT status is 200
+     ✓ FC_put_back status is 200
+  ````
+  - Тест пройден. Время ответа не выходит за рамки SLO. Ошибок нет.
 
 # Stress test:
 
