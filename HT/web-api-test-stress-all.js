@@ -5,12 +5,10 @@ import { randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 //Basic variables
 
 const API_BASE_URL = 'http://91.185.85.213'
-const API_GET_ENDPOINT1 = 'WeatherForecast'
-const API_GET_ENDPOINT2 = 'Cities/1'
 const API_HOST = 'weather.student71.local'
-const API_ENDPOINTS = ['Cities', 'Forecast'];
-const VUS = [1, 1]
-const TARGET = [50, 50]
+const API_ENDPOINTS = ['Cities', 'Forecast', 'WeatherForecast'];
+const VUS = [10, 10]
+const TARGET = [10, 10]
 const DURATION = ['1m', '1m'] // SLO Load time
 const SLO_ERRORS = 'rate<=0.01'
 const SLO_REQ_DURATION = 'p(95)<=500'
@@ -35,6 +33,7 @@ export const options = {
       timeUnit: '1s',
       preAllocatedVUs: `${VUS[0]}`,
       stages: [
+        { target: `${TARGET[0]}`, duration: `1m` },
         { target: `${TARGET[0]}`, duration: `${DURATION[0]}` },
       ],
     },
@@ -48,6 +47,7 @@ export const options = {
       timeUnit: '1s',
       preAllocatedVUs: `${VUS[1]}`,
       stages: [
+        { target: `${TARGET[1]}`, duration: `1m` },
         { target: `${TARGET[1]}`, duration: `${DURATION[1]}` },
       ],
     },
@@ -109,6 +109,11 @@ export function stress_cities() {
   let API_PUT_CITY_NAME3 = res_get_cityid3.json("name");
 //  console.log("RETURN VALUE = "+API_PUT_CITY_NAME3);
 
+  let weatherforecast = http.get(`${API_BASE_URL}/${API_ENDPOINTS[2]}/`, params);
+
+  check(weatherforecast, {
+    "WeatherForecast_res status is 200": (r) => r.status === 200
+  });
   check(res, {
     "C_res status is 200": (r) => r.status === 200
   });
@@ -153,6 +158,11 @@ export function stress_forecast() {
   let API_PUT_FORECAST_SUMMARY3 = res_get_forecastid3.json("summary");
 //  console.log("RETURN VALUE = "+API_PUT_FORECAST_SUMMARY3);
 
+  let weatherforecast = http.get(`${API_BASE_URL}/${API_ENDPOINTS[2]}/`, params);
+
+  check(weatherforecast, {
+    "WeatherForecast_res status is 200": (r) => r.status === 200
+  });
   check(res, {
     "FC_res status is 200": (r) => r.status === 200
   });
