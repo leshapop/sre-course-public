@@ -90,10 +90,43 @@ blade create cpu fullload --cpu-percent 97 --timeout 300
 -  Исправлены некоторые пороги срабатывания алертов.
 
 ## Эксперимент №5 "Split-brain"
-1. Описание эксперимента:
-2. Ожидаемые результаты: 
-3. Реальные результаты: 
-4. Анализ результатов: 
+1. **Описание эксперимента:**
+-  Запускаем на мастере и реплике одновременно:
+````
+blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 600
+````
+````
+blade create network loss --percent 100 --destination-ip 10.0.33.4,10.0.33.5,10.0.33.6,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 600
+````
+2. **Ожидаемые результаты:** 
+3. **Реальные результаты:**
+-  Начальное положение дел в кластере:
+
+    ![ht](./images/exp5split-brain1.png)
+
+-  Лидер не был выбран т.к. отсутсвует связь с кластером etcd.
+
+    ![ht](./images/exp5split-brain2.png)
+
+-  Приложение перестало работать. Наблюдаются ошибки и полное отсутствие связи с базой данных. 
+
+    ![ht](./images/exp5split-brain3.png)
+
+-  Обе ноды patroni/postgres перешли в статус Replica. 
+
+   ![ht](./images/exp5split-brain4.png)
+ 
+   ![ht](./images/exp5split-brain5.png) 
+
+-  Сработали алерты на latency, http errors, доступность blackbox и patroni has no leader alert. 
+
+   ![ht](./images/exp5split-brain6.png)
+
+-  После появления связи все пришло в норму. Объявлен лидер кластера и реплика с лагом. Работоспособность приложения восстановлена.
+
+   ![ht](./images/exp5split-brain7.png)
+
+4. **Анализ результатов:** 
 
 ## Эксперимент №6 "Долгосрочная изоляция"
 1. Описание эксперимента:
