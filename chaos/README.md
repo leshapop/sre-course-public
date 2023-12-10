@@ -288,6 +288,22 @@ Dec 10 16:53:54 s71-pgsql01 patroni[920]: INFO:patroni.ha:Lock owner: s71-pgsql0
 -  При недоступности всех нод etcd кластер patroni переходит в режим read-only. Мастер теряет ключ и становится репликой.
 -  Выяснили, что зависимость узлов patroni от etcd очень велика для высокой доступности и отказоустойчивости.
 -  Необходимо обеспечить высокую доступность нод etcd и не разделять их с patroni регионально. Иметь как минимум 3 ноды etcd.
+-  Возможно стоит использовать [failsafe_mode: true](https://patroni.readthedocs.io/en/latest/dcs_failsafe_mode.html) в patroni, чтобы избежать перехода в режим read-only при доступности связи между master/slave нодами.
+   ````
+   patronictl -c /etc/patroni/patroni.yml edit-config --set failsafe_mode=true --force
+   patronictl -c /etc/patroni/patroni.yml reload s71_pgsql_cluster
+   ````
+-  С опцией ```failsafe_mode: true``` наблюдаем что patroni сохраняет включ лидера пока может подключаться к нодам репликам:
+   ````
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: ERROR:patroni.ha:Error communicating with DCS
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: 2023-12-10 21:39:45,594 ERROR: Exceeded retry deadline
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: 2023-12-10 21:39:45,595 ERROR: Error communicating with DCS
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: INFO:patroni.ha:Got response from s71-pgsql02 http://10.0.33.4:8008/patroni: Accepted
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: 2023-12-10 21:39:45,599 INFO: Got response from s71-pgsql02 http://10.0.33.4:8008/patroni: Accepted
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: INFO:patroni.__main__:continue to run as a leader because failsafe mode is enabled and all members are accessible
+   Dec 10 21:39:45 s71-pgsql01 patroni[920]: 2023-12-10 21:39:45,600 INFO: continue to run as a leader because failsafe mode is enabled and all members are accessible
+
+   ````
 
 ## Дополнительный эксперимент №8 Split-Brain advanced
 1. **Описание эксперимента:**
@@ -305,6 +321,8 @@ Dec 10 16:53:54 s71-pgsql01 patroni[920]: INFO:patroni.ha:Lock owner: s71-pgsql0
    ````
    blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6 --interface ens160 --exclude-port 22 --timeout 600
    ````
+-  Для удобства запуска можно использовать Ansible.
+
 2. **Ожидаемые результаты:** 
 -  Изучить поведение patroni в рамках изоляции узлов вместе с etcd от master/slave.
 -  Объявление лидеров на обоих узлах patroni/postgres. 
