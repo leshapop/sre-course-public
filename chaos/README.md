@@ -4,9 +4,19 @@
 
 ![homework postgresql cluster](../images/pg_cluster.png)
 
+## Инструменты
+```ChaosBlade```
+
+-  Установка:
+````
+wget https://github.com/chaosblade-io/chaosblade/releases/download/v1.7.2/chaosblade-1.7.2-linux-amd64.tar.gz
+
+tar -xvf chaosblade-1.7.2-linux-amd64.tar.gz && cd chaosblade-1.7.2/
+````
+
 ## Эксперимент №1 "Отключение узла"
 1. **Описание эксперимента:**
--  Подадим дневной профиль нагрузки (daily) k6 на приложение. Физический отключим DB master узел postgres/patroni в консоли MTSCloud.
+-  Подадим дневной профиль нагрузки (daily) k6 на приложение. Физически отключим DB master узел postgres/patroni в консоли MTSCloud.
 2. **Ожидаемые результаты:**
 -  Переключение на нового лидера за ~25 сек и менее, восстановлена работоспособность в течении 1 мин.
 3. **Реальные результаты:** 
@@ -116,7 +126,7 @@ SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_
 2. **Ожидаемые результаты:** 
 -  Срабатывание алертов согласно настройкам в prometheus.
 3. **Реальные результаты:** 
--  Некоторые алерты имели погрешности в порогах срабатывания и требовали донастройки.
+-  Некоторые алерты имели погрешности в порогах срабатывания и требовали настройки.
 
     ![ht](./images/exp4disk1.png)
 
@@ -132,12 +142,12 @@ SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_
 
 4. **Анализ результатов:** 
 -  Благодаря экспериметам удалось выявить недочеты в конфигурации алертов. Не всегда ожидание совпадало с реальным порогом срабатывания.
--  Исправлены некоторые пороги срабатывания алертов.
+-  Исправлены некоторые пороги срабатывания алертов, спасибо хаосу за это! :)
 
 ## Эксперимент №5 "Split-brain"
 1. **Описание эксперимента:**
 -  Попробуем с помощью утилиты chaosblade изолировать узлы patroni/postgres и спровоцируем выборы нового лидера в замкнутой среде.
--  Попытаемся вызвать эффект plit-brain когда каждая нода объявит себя лидером.
+-  Попытаемся вызвать эффект split-brain когда каждая нода объявит себя лидером.
 -  Запускаем на мастере и реплике одновременно:
    ````
    blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 600
@@ -147,7 +157,7 @@ SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_
    ````
 2. **Ожидаемые результаты:** 
 -  Изучить поведение patroni в рамках изоляции от узлов etcd и от master/slave узла.
--  Вызов split-brain на обоих узлах patroni/postgres. 
+-  Объявление лидеров на обоих узлах patroni/postgres. 
 3. **Реальные результаты:**
 -  Начальное положение дел в кластере:
 
@@ -178,6 +188,7 @@ SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_
 4. **Анализ результатов:** 
 -  Не получилось вызвать split-brain на нодах, patroni при потере связи с etcd перевел каждую ноду postgres в статус replica. 
 -  При исходных данных и полной изоляции ноды patroni split-brain невозможен.
+
 ## Эксперимент №6 "Долгосрочная изоляция"
 1. **Описание эксперимента:**
 -  Отключим связь реплики на 20 минут
@@ -185,21 +196,143 @@ SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_
    ````
    blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 1200
    ````
-  
--  Смотрим репликацию:
-
-   ````
-   select * from pg_stat_wal_receiver;
-   ````
+-  Смотрим репликацию на мастере и реплике.
   
 2. **Ожидаемые результаты:** 
+-  Нода остается в статусе реплики.
 -  Продолжение репликации после восстановления связи с мастером.
-3. **Реальные результаты:** 
+3. **Реальные результаты:**  
+-  Смотрим репликацию на мастере:
+````
+postgres=# SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_lag FROM pg_stat_replication;
+ pid | application_name | client_addr | client_hostname | state | sync_state | replay_lag
+-----+------------------+-------------+-----------------+-------+------------+------------
+(0 rows)
+````
+-  Смотрим репликацию на реплике:
+````
+    pid | status | receive_start_lsn | receive_start_tli | written_lsn | flushed_lsn | received_tli | last_msg_send_time | last_msg_receipt_time | latest_end_lsn | latest_end_time | slot_name | sender_host | sender_port | conninfo
+-----+--------+-------------------+-------------------+-------------+-------------+--------------+--------------------+-----------------------+----------------+-----------------+-----------+-------------+-------------+----------
+(0 rows)
+````
+-  После восстановления связи:
+````
+   postgres=# SELECT pid,application_name,client_addr,client_hostname,state,sync_state,replay_lag FROM pg_stat_replication;
+  pid   | application_name | client_addr | client_hostname |   state   | sync_state | replay_lag
+--------+------------------+-------------+-----------------+-----------+------------+------------
+ 288938 | s71-pgsql02      | 10.0.33.4   |                 | streaming | async      |
+(1 row)
 
+  pid  |  status   | receive_start_lsn | receive_start_tli | written_lsn | flushed_lsn | received_tli |      last_msg_send_time       |     last_msg_receipt_time     | latest_end_lsn |        latest_end_time        |  slot_name  | sender_host | sender_port |                                                                                                                                                                                                    conninfo                                                                                                                                                            
+-------+-----------+-------------------+-------------------+-------------+-------------+--------------+-------------------------------+-------------------------------+----------------+-------------------------------+-------------+-------------+-------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 23140 | streaming | 0/3D000000        |                12 |             | 0/3D000000  |           12 | 2023-12-10 16:33:20.589179+03 | 2023-12-10 16:33:20.589146+03 | 0/3D000000     | 2023-12-10 16:30:49.180551+03 | s71_pgsql02 | 10.0.33.3   |        5432 | user=replicator passfile=/var/lib/postgresql/.pgpass_patroni channel_binding=prefer dbname=replication host=10.0.33.3 port=5432 application_name=s71-pgsql02 fallback_application_name=s71_pgsql_cluster sslmode=prefer sslcompression=0 sslcertmode=allow sslsni=1 ssl_min_protocol_version=TLSv1.2 gssencmode=prefer krbsrvname=postgres gssdelegation=0 target_session_attrs=any load_balance_hosts=disable
+(1 row)
+
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: 2023-12-10 16:30:48,403 ERROR: Exceeded retry deadline
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: 2023-12-10 16:30:48,404 ERROR: Error communicating with DCS
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: INFO:patroni.__main__:DCS is not accessible
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: 2023-12-10 16:30:48,405 INFO: DCS is not accessible
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: WARNING:patroni.__main__:Loop time exceeded, rescheduling immediately.
+Dec 10 16:30:48 s71-pgsql02 patroni[847]: 2023-12-10 16:30:48,407 WARNING: Loop time exceeded, rescheduling immediately.
+Dec 10 16:30:50 s71-pgsql02 patroni[847]: INFO:patroni.ha:Lock owner: s71-pgsql01; I am s71-pgsql02
+Dec 10 16:30:50 s71-pgsql02 patroni[847]: INFO:patroni.__main__:no action. I am (s71-pgsql02), a secondary, and following a leader (s71-pgsql01)
+Dec 10 16:30:50 s71-pgsql02 patroni[847]: 2023-12-10 16:30:50,204 INFO: no action. I am (s71-pgsql02), a secondary, and following a leader (s71-pgsql01)
+
+````
 4. **Анализ результатов:** 
+-  После восстановления связи узел patroni объявил себя репликой и восстановил связь с мастером. Репликация продолжилась. 
 
 ## Эксперимент №7 "Сбои сервисов зависимостей"
 1. **Описание эксперимента:**
+-  С помощью chaosblade сделаем недоступными ВСЕ ноды etcd со стороны узлов patroni/postgres.
+- 1 вариант - На узлах мастер/реплика запускаем:
+````
+blade create network loss --percent 100 --destination-ip 10.0.33.5,10.0.33.6,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 600
+````
+-  2 вариант - оставляем доступ только к 1 ноде etcd.
+````
+blade create network loss --percent 100 --destination-ip 10.0.33.5,10.0.33.6 --interface ens160 --exclude-port 22 --timeout 600
+````
 2. **Ожидаемые результаты:** 
-3. **Реальные результаты:** 
+-  Т.к. Связь мастера и реплики сохранена, это не должно повлиять на работу кластера. Выборы мастера не должны произойти.
+3. **Реальные результаты:**
+-  **Потеряны ВСЕ ноды etcd:** Логи мастера и реплики. Связь с etcd потеряна.
+````
+Dec 10 16:45:00 s71-pgsql02 patroni[847]: ERROR:patroni.dcs.etcd:Exceeded retry deadline
+Dec 10 16:45:00 s71-pgsql02 patroni[847]: ERROR:patroni.ha:Error communicating with DCS
+Dec 10 16:45:00 s71-pgsql02 patroni[847]: 2023-12-10 16:45:00,629 ERROR: Exceeded retry deadline
+Dec 10 16:45:00 s71-pgsql02 patroni[847]: 2023-12-10 16:45:00,630 ERROR: Error communicating with DCS
+Dec 10 16:45:00 s71-pgsql02 patroni[847]: INFO:patroni.__main__:DCS is not accessible
+
+````
+-  Patroni переводит кластер в режим read-only. Мастер теряет ключ и становится репликой.
+
+   ![ht](./images/exp7etcd1.png)
+
+- **Вариант с 1 нодой etcd:**
+- Работоспособность кластера сохранена.
+````
+Dec 10 16:53:49 s71-pgsql01 patroni[920]: 2023-12-10 16:53:49,231 INFO: Retrying on http://10.0.33.7:2379
+Dec 10 16:53:49 s71-pgsql01 patroni[920]: INFO:patroni.dcs.etcd:Selected new etcd server http://10.0.33.7:2379
+Dec 10 16:53:49 s71-pgsql01 patroni[920]: 2023-12-10 16:53:49,235 INFO: Selected new etcd server http://10.0.33.7:2379
+
+Dec 10 16:53:50 s71-pgsql01 patroni[920]: INFO:patroni.__main__:no action. I am (s71-pgsql01), the leader with the lock
+Dec 10 16:53:50 s71-pgsql01 patroni[920]: 2023-12-10 16:53:50,910 INFO: no action. I am (s71-pgsql01), the leader with the lock
+Dec 10 16:53:54 s71-pgsql01 patroni[920]: INFO:patroni.ha:Lock owner: s71-pgsql01; I am s71-pgsql01
+
+````
+-  Мастер сохранил ключ. 
+
 4. **Анализ результатов:** 
+-  Для работы кластера в режиме мастер/реплика нужна как минимум 1 доступная нода etcd. 
+-  При недоступности всех нод etcd кластер patroni переходит в режим read-only. Мастер теряет ключ и становится репликой.
+-  Выяснили, что зависимость узлов patroni от etcd очень велика для высокой доступности и отказоустойчивости.
+-  Необходимо обеспечить высокую доступность нод etcd и не разделять их с patroni регионально. Иметь как минимум 3 ноды etcd.
+
+## Дополнительный эксперимент №8 Split-Brain advanced
+1. **Описание эксперимента:**
+-  Попробуем изолировать узлы patroni вместе с изолированными узлами etcd.
+-  Мастер будет изолирован с 2мя нодами etcd. Реплика с 3 нодой etcd.
+-  На мастере изолируем от реплики и 1 ноды etcd:
+   ````
+   blade create network loss --percent 100 --destination-ip 10.0.33.4,10.0.33.7 --interface ens160 --exclude-port 22 --timeout 600
+   ````
+-  На реплике изолируем от мастера и 2 нод etcd:
+   ````
+   ./blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6 --interface ens160 --exclude-port 22 --timeout 600
+   ````
+-  На 3 ноде etcd изолируем от мастера и 2 нод etcd:  
+   ````
+   blade create network loss --percent 100 --destination-ip 10.0.33.3,10.0.33.5,10.0.33.6 --interface ens160 --exclude-port 22 --timeout 600
+   ````
+2. **Ожидаемые результаты:** 
+-  Изучить поведение patroni в рамках изоляции узлов вместе с etcd от master/slave.
+-  Объявление лидеров на обоих узлах patroni/postgres. 
+3. **Реальные результаты:**
+-  Логи мастера:
+````
+Dec 10 17:22:45 s71-pgsql01 patroni[920]: 2023-12-10 17:22:44,219 INFO: Lock owner: s71-pgsql01; I am s71-pgsql01
+Dec 10 17:22:45 s71-pgsql01 patroni[920]: 2023-12-10 17:22:45,891 ERROR: Failed to get list of machines from http://10.0.33.7:2379/v3: MaxRetryError("HTTPConnectionPool(host='10.0.33.7', port=2379): Max retries exceeded with url: /v3/cluster/member/list (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x7fc02d0069b0>, 'Connection to 10.0.33.7 timed out. (connect timeout=1.6666666666666667)'))")
+Dec 10 17:22:45 s71-pgsql01 patroni[920]: INFO:patroni.__main__:no action. I am (s71-pgsql01), the leader with the lock
+Dec 10 17:22:45 s71-pgsql01 patroni[920]: 2023-12-10 17:22:45,898 INFO: no action. I am (s71-pgsql01), the leader with the lock
+Dec 10 17:22:54 s71-pgsql01 patroni[920]: INFO:patroni.ha:Lock owner: s71-pgsql01; I am s71-pgsql01
+Dec 10 17:22:54 s71-pgsql01 patroni[920]: INFO:patroni.__main__:no action. I am (s71-pgsql01), the leader with the lock
+Dec 10 17:22:54 s71-pgsql01 patroni[920]: 2023-12-10 17:22:54,266 INFO: no action. I am (s71-pgsql01), the leader with the lock
+````
+-  Логи реплики:
+````
+Dec 10 17:23:38 s71-pgsql02 patroni[847]: etcd.EtcdConnectionFailed: No more machines in the cluster
+Dec 10 17:23:38 s71-pgsql02 patroni[847]: 2023-12-10 17:23:38,068 INFO: no action. I am (s71-pgsql02), a secondary, and following a leader (s71-pgsql01)
+Dec 10 17:23:38 s71-pgsql02 patroni[847]: WARNING:patroni.__main__:Loop time exceeded, rescheduling immediately.
+Dec 10 17:23:38 s71-pgsql02 patroni[847]: 2023-12-10 17:23:38,071 WARNING: Loop time exceeded, rescheduling immediately.
+Dec 10 17:23:39 s71-pgsql02 patroni[847]: ERROR:patroni.dcs.etcd:Failed to get list of machines from http://10.0.33.6:2379/v3: MaxRetryError("HTTPConnectionPool(host='10.0.33.6', port=2379): Max retries exceeded with url: /v3/cluster/member/list (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x7fd4105e2740>, 'Connection to 10.0.33.6 timed out. (connect timeout=1.6666666666666667)'))")
+````
+-  Сработал алерт на etcd_server_has_leader, т.к. мы изолировали 3ю ноду etcd.
+
+   ![ht](./images/exp8split1.png)
+
+4. **Анализ результатов:** 
+-  Уловка не сработала. Кластер остался работоспособным.
+-  Новых выборов мастера не произошло. Patroni смог удержать управление кластером. Split-brain не случился. 
+-  Допускается временная недоступность некоторых узлов etcd без потери работоспособности.
+
